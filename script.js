@@ -13,7 +13,29 @@ for (let i = 0; i < board.length; i++) {
   tile[i] = new Array(columns)
 }
 
+init();
+
 function check(row, column) {
   if (column >= 0 && row >= 0 && column < columns && row < rows)
     return board[row][column];
 }
+
+function init() {
+  mines = 5;
+  remaining = mines;
+  revealed = 0;
+  status.innerHTML = 'Click on the tiles to reveal them';
+  for (let row = 0; row < rows; row++)
+    for (let column = 0; column < columns; column++) {
+      let index = row * columns + column;
+      tile[row][column] = document.createElement('img');
+      tile[row][column].src = 'img/hidden.png';
+      tile[row][column].style = 'position:absolute;height:30px; width: 30px';
+      tile[row][column].style.top = 150 + row * 30;
+      tile[row][column].style.left = 50 + column * 30;
+      tile[row][column].addEventListener('mousedown', click);
+      tile[row][column].id = index;
+      document.body.appendChild(tile[row][column]);
+      picture[row][column] = 'hidden';
+      board[row][column] = '';
+    }
