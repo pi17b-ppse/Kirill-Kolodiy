@@ -1,6 +1,8 @@
 const rows = 10;
 const columns = 10;
 let mines, remaining, revealed;
+let status = document.getElementById('status');
+status.addEventListener('click', init)
 
 let board = new Array(rows);
 let picture = new Array(rows);
