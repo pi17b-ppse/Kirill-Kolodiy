@@ -12,3 +12,8 @@ for (let i = 0; i < board.length; i++) {
   picture[i] = new Array(columns);
   tile[i] = new Array(columns)
 }
+
+function check(row, column) {
+  if (column >= 0 && row >= 0 && column < columns && row < rows)
+    return board[row][column];
+}
