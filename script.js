@@ -66,3 +66,51 @@ function init() {
       }
     }
 }
+
+function click(event) {
+  let source = event.target;
+  let id = source.id;
+  let row = Math.floor(id / columns);
+  let column = id % columns;
+
+  if (event.which == 3) {
+    switch (picture[row][column]) {
+      case 'hidden':
+        tile[row][column].src = 'img/flag.png';
+        remaining--;
+        picture[row][column] = 'flag';
+        break;
+      case 'flag':
+        tile[row][column].src = 'img/question.png';
+        remaining++;
+        picture[row][column] = 'question';
+        break;
+      case 'question':
+        tile[row][column].src = 'img/hidden.png';
+        picture[row][column] = 'hidden';
+        break;
+    }
+    event.preventDefault();
+  }
+  status.innerHTML = 'Mines remaining: ' + remaining;
+
+  if (event.which == 1 && picture[row][column] != 'flag') {
+    if (board[row][column] == 'mine') {
+      for (let row = 0; row < rows; row++)
+        for (let column = 0; column < columns; column++) {
+          if (board[row][column] == 'mine') {
+            tile[row][column].src = 'img/mine.png';
+          }
+          if (board[row][column] != 'mine' && picture[row][column] == 'flag') {
+            tile[row][column].src = 'img/misplaced.png';
+          }
+        }
+      status.innerHTML = 'GAME OVER<br><br>Click here to restart';
+    } else
+    if (picture[row][column] == 'hidden') reveal(row, column);
+  }
+
+  if (revealed == rows * columns - mines)
+    status.innerHTML = 'YOU WIN!<br><br>Click here to restart';
+}
+
