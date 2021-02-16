@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: script.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: script.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Количество строк игрового поля.
+ * @const {integer} - количество строк.
+ */
+const rows = 10;
+/**
+ * Количество столбцов игрового поля.
+ * @const {integer} - количество столбцов.
+ */
+const columns = 10;
+/**
+ * Переменные для отслеживания количества плиток:
+ * 1) заминированые
+ * 2) оставшиеся
+ * 3) открытые
+ */
+let mines, remaining, revealed;
+/**
+ * Ожидание нажатия кнопки мыши.
+ */
+let status = document.getElementById('status');
+status.addEventListener('click', init)
+
+/**
+ * Массивы для игрового поля и изображений.
+ */
+let board = new Array(rows);
+let picture = new Array(rows);
+let tile = new Array(rows);
+for (let i = 0; i &lt; board.length; i++) {
+  board[i] = new Array(columns);
+  picture[i] = new Array(columns);
+  tile[i] = new Array(columns)
+}
+/**
+ * Вызов функции инициализации.
+ */
+init();
+
+/**
+ * Функция проверяет, что координаты не выходят за пределы доски.&lt;br>
+ * Значение плитки в координатах (column, row).&lt;br>
+ * Координата (0,0) находится в верхнем левом углу.
+ *
+ * @param {integer} row - индекс массива.
+ * @param {integer} column - индекс массива.
+ * @returns {Array} -  координаты поля.
+ */
+function check(row, column) {
+  if (column >= 0 &amp;&amp; row >= 0 &amp;&amp; column &lt; columns &amp;&amp; row &lt; rows)
+    return board[row][column];
+}
+
+/**
+ * Функция инициализирует игровое поле.&lt;br>
+ * Задается количесво мин и переменная для&lt;br>
+ * определения сколько ещё надо найти.&lt;br>
+ * Мины расставляются случайным образом.&lt;br>
+ * Каждая плитка это картинка, также сделана&lt;br>
+ * привязка к нажатию кнопки мыши.
+ *
+ * @returns {void}
+ */
+function init() {
+  mines = 5;
+  remaining = mines;
+  revealed = 0;
+  status.innerHTML = 'Click on the tiles to reveal them';
+  for (let row = 0; row &lt; rows; row++)
+    for (let column = 0; column &lt; columns; column++) {
+      let index = row * columns + column;
+      tile[row][column] = document.createElement('img');
+      tile[row][column].src = 'img/hidden.png';
+      tile[row][column].style = 'position:absolute;height:30px; width: 30px';
+      tile[row][column].style.top = 150 + row * 30;
+      tile[row][column].style.left = 50 + column * 30;
+      tile[row][column].addEventListener('mousedown', click);
+      tile[row][column].id = index;
+      document.body.appendChild(tile[row][column]);
+      picture[row][column] = 'hidden';
+      board[row][column] = '';
+    }
+
+  let placed = 0;
+  while (placed &lt; mines) {
+    let column = Math.floor(Math.random() * columns);
+    let row = Math.floor(Math.random() * rows);
+
+    if (board[row][column] != 'mine') {
+      board[row][column] = 'mine';
+      placed++;
+    }
+  }
+
+  for (let column = 0; column &lt; columns; column++)
+    for (let row = 0; row &lt; rows; row++) {
+      if (check(row, column) != 'mine') {
+        board[row][column] =
+          ((check(row + 1, column) == 'mine') | 0) +
+          ((check(row + 1, column - 1) == 'mine') | 0) +
+          ((check(row + 1, column + 1) == 'mine') | 0) +
+          ((check(row - 1, column) == 'mine') | 0) +
+          ((check(row - 1, column - 1) == 'mine') | 0) +
+          ((check(row - 1, column + 1) == 'mine') | 0) +
+          ((check(row, column - 1) == 'mine') | 0) +
+          ((check(row, column + 1) == 'mine') | 0);
+      }
+    }
+}
+
+/**
+ * Функция обработки нажатий правой&lt;br>
+ * и левой кнопок мыши.&lt;br>
+ * При нажатии любой кнопки меняется&lt;br>
+ * свойство плитки, обращение к плиткам&lt;br>
+ * происходит через их ID.
+ *
+ * @returns {void}
+ */
+function click(event) {
+  let source = event.target;
+  let id = source.id;
+  let row = Math.floor(id / columns);
+  let column = id % columns;
+
+  if (event.which == 3) {
+    switch (picture[row][column]) {
+      case 'hidden':
+        tile[row][column].src = 'img/flag.png';
+        remaining--;
+        picture[row][column] = 'flag';
+        break;
+      case 'flag':
+        tile[row][column].src = 'img/question.png';
+        remaining++;
+        picture[row][column] = 'question';
+        break;
+      case 'question':
+        tile[row][column].src = 'img/hidden.png';
+        picture[row][column] = 'hidden';
+        break;
+    }
+    event.preventDefault();
+  }
+  status.innerHTML = 'Mines remaining: ' + remaining;
+
+  if (event.which == 1 &amp;&amp; picture[row][column] != 'flag') {
+    if (board[row][column] == 'mine') {
+      for (let row = 0; row &lt; rows; row++)
+        for (let column = 0; column &lt; columns; column++) {
+          if (board[row][column] == 'mine') {
+            tile[row][column].src = 'img/mine.png';
+          }
+          if (board[row][column] != 'mine' &amp;&amp; picture[row][column] == 'flag') {
+            tile[row][column].src = 'img/misplaced.png';
+          }
+        }
+      status.innerHTML = 'GAME OVER&lt;br>&lt;br>Click here to restart';
+    } else
+    if (picture[row][column] == 'hidden') reveal(row, column);
+  }
+
+  if (revealed == rows * columns - mines)
+    status.innerHTML = 'YOU WIN!&lt;br>&lt;br>Click here to restart';
+}
+
+/**
+ * Функция вызывается для обнаружения&lt;br>
+ * всех соседних нулевых плиток.
+ *
+ * @param  {integer} row - индекс массива.
+ * @param {integer} column - индекс массива.
+ * @returns {void}
+ */
+function reveal(row, column) {
+  tile[row][column].src = 'img/' + board[row][column] + '.png';
+  if (board[row][column] != 'mine' &amp;&amp; picture[row][column] == 'hidden')
+    revealed++;
+  picture[row][column] = board[row][column];
+
+  if (board[row][column] == 0) {
+    if (column > 0 &amp;&amp; picture[row][column - 1] == 'hidden') reveal(row, column - 1);
+    if (column &lt; (columns - 1) &amp;&amp; picture[row][+column + 1] == 'hidden') reveal(row, +column + 1);
+    if (row &lt; (rows - 1) &amp;&amp; picture[+row + 1][column] == 'hidden') reveal(+row + 1, column);
+    if (row > 0 &amp;&amp; picture[row - 1][column] == 'hidden') reveal(row - 1, column);
+    if (column > 0 &amp;&amp; row > 0 &amp;&amp; picture[row - 1][column - 1] == 'hidden') reveal(row - 1, column - 1);
+    if (column > 0 &amp;&amp; row &lt; (rows - 1) &amp;&amp; picture[+row + 1][column - 1] == 'hidden') reveal(+row + 1, column - 1);
+    if (column &lt; (columns - 1) &amp;&amp; row &lt; (rows - 1) &amp;&amp; picture[+row + 1][+column + 1] == 'hidden') reveal(+row + 1, +column + 1);
+    if (column &lt; (columns - 1) &amp;&amp; row > 0 &amp;&amp; picture[row - 1][+column + 1] == 'hidden') reveal(row - 1, +column + 1);
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#board">board</a></li><li><a href="global.html#check">check</a></li><li><a href="global.html#click">click</a></li><li><a href="global.html#columns">columns</a></li><li><a href="global.html#init">init</a></li><li><a href="global.html#mines">mines</a></li><li><a href="global.html#reveal">reveal</a></li><li><a href="global.html#rows">rows</a></li><li><a href="global.html#status">status</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Wed Feb 17 2021 00:13:49 GMT+0300 (Москва, стандартное время)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
