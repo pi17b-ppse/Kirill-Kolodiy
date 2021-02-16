@@ -1,9 +1,29 @@
+/**
+ * Количество строк игрового поля.
+ * @const {integer} - количество строк.
+ */
 const rows = 10;
+/**
+ * Количество столбцов игрового поля.
+ * @const {integer} - количество столбцов.
+ */
 const columns = 10;
+/**
+ * Переменные для отслеживания количества плиток:
+ * 1) заминированые
+ * 2) оставшиеся
+ * 3) открытые
+ */
 let mines, remaining, revealed;
+/**
+ * Ожидание нажатия кнопки мыши.
+ */
 let status = document.getElementById('status');
 status.addEventListener('click', init)
 
+/**
+ * Массивы для игрового поля и изображений.
+ */
 let board = new Array(rows);
 let picture = new Array(rows);
 let tile = new Array(rows);
@@ -12,14 +32,35 @@ for (let i = 0; i < board.length; i++) {
   picture[i] = new Array(columns);
   tile[i] = new Array(columns)
 }
-
+/**
+ * Вызов функции инициализации.
+ */
 init();
 
+/**
+ * Функция проверяет, что координаты не выходят за пределы доски.<br>
+ * Значение плитки в координатах (column, row).<br>
+ * Координата (0,0) находится в верхнем левом углу.
+ *
+ * @param {integer} row - индекс массива.
+ * @param {integer} column - индекс массива.
+ * @returns {Array} -  координаты поля.
+ */
 function check(row, column) {
   if (column >= 0 && row >= 0 && column < columns && row < rows)
     return board[row][column];
 }
 
+/**
+ * Функция инициализирует игровое поле.<br>
+ * Задается количесво мин и переменная для<br>
+ * определения сколько ещё надо найти.<br>
+ * Мины расставляются случайным образом.<br>
+ * Каждая плитка это картинка, также сделана<br>
+ * привязка к нажатию кнопки мыши.
+ *
+ * @returns {void}
+ */
 function init() {
   mines = 5;
   remaining = mines;
@@ -67,6 +108,15 @@ function init() {
     }
 }
 
+/**
+ * Функция обработки нажатий правой<br>
+ * и левой кнопок мыши.<br>
+ * При нажатии любой кнопки меняется<br>
+ * свойство плитки, обращение к плиткам<br>
+ * происходит через их ID.
+ *
+ * @returns {void}
+ */
 function click(event) {
   let source = event.target;
   let id = source.id;
@@ -114,6 +164,14 @@ function click(event) {
     status.innerHTML = 'YOU WIN!<br><br>Click here to restart';
 }
 
+/**
+ * Функция вызывается для обнаружения<br>
+ * всех соседних нулевых плиток.
+ *
+ * @param  {integer} row - индекс массива.
+ * @param {integer} column - индекс массива.
+ * @returns {void}
+ */
 function reveal(row, column) {
   tile[row][column].src = 'img/' + board[row][column] + '.png';
   if (board[row][column] != 'mine' && picture[row][column] == 'hidden')
