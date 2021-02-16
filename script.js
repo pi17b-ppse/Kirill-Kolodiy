@@ -114,3 +114,20 @@ function click(event) {
     status.innerHTML = 'YOU WIN!<br><br>Click here to restart';
 }
 
+function reveal(row, column) {
+  tile[row][column].src = 'img/' + board[row][column] + '.png';
+  if (board[row][column] != 'mine' && picture[row][column] == 'hidden')
+    revealed++;
+  picture[row][column] = board[row][column];
+
+  if (board[row][column] == 0) {
+    if (column > 0 && picture[row][column - 1] == 'hidden') reveal(row, column - 1);
+    if (column < (columns - 1) && picture[row][+column + 1] == 'hidden') reveal(row, +column + 1);
+    if (row < (rows - 1) && picture[+row + 1][column] == 'hidden') reveal(+row + 1, column);
+    if (row > 0 && picture[row - 1][column] == 'hidden') reveal(row - 1, column);
+    if (column > 0 && row > 0 && picture[row - 1][column - 1] == 'hidden') reveal(row - 1, column - 1);
+    if (column > 0 && row < (rows - 1) && picture[+row + 1][column - 1] == 'hidden') reveal(+row + 1, column - 1);
+    if (column < (columns - 1) && row < (rows - 1) && picture[+row + 1][+column + 1] == 'hidden') reveal(+row + 1, +column + 1);
+    if (column < (columns - 1) && row > 0 && picture[row - 1][+column + 1] == 'hidden') reveal(row - 1, +column + 1);
+  }
+}
